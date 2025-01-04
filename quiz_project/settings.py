@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-jxoru$q=)+-omzi-us3wnlt2v(sj11qwt9i+$*@y&gs5%-o&u^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['pyquizgrader-1.onrender.com']
 
 
 # Application definition

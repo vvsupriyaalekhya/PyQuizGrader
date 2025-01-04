@@ -403,3 +403,124 @@ def logout_view(request):
 def capture_view(request):
     return render(request, 'quiz/capture.html')
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import cv2
+import numpy as np
+from io import BytesIO
+from PIL import Image
+
+net = cv2.dnn.readNet("quiz/templates/quiz/yolov4-tiny.weights", "quiz/templates/quiz/yolov4-tiny.cfg")
+layer_names = net.getLayerNames()
+output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
+
+with open("quiz/templates/quiz/coco.names", "r") as f:
+    classes = [line.strip() for line in f.readlines()]
+
+import cv2
+import numpy as np
+
+def detect_objects(image, net, output_layers, classes):
+    blob = cv2.dnn.blobFromImage(image, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
+    net.setInput(blob)
+    outs = net.forward(output_layers)
+
+    class_ids = []
+    confidences = []
+    boxes = []
+    height, width, _ = image.shape
+
+    for out in outs:
+        for detection in out:
+            scores = detection[5:]
+            class_id = np.argmax(scores)
+            confidence = scores[class_id]
+            if confidence > 0.5:  # Confidence threshold
+                center_x = int(detection[0] * width)
+                center_y = int(detection[1] * height)
+                w = int(detection[2] * width)
+                h = int(detection[3] * height)
+
+                x = int(center_x - w / 2)
+                y = int(center_y - h / 2)
+
+                boxes.append([x, y, w, h])
+                confidences.append(float(confidence))
+                class_ids.append(class_id)
+
+    # Apply NMS
+    indices = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+
+    detected_objects = []
+    if len(indices) > 0:
+        for i in indices.flatten():
+            x, y, w, h = boxes[i]
+            label = str(classes[class_ids[i]])  # Get the label
+            confidence = round(confidences[i] * 100, 2)
+            detected_objects.append({"label": label, "confidence": confidence, "box": [x, y, w, h]})
+
+    return detected_objects
+
+import cv2
+import numpy as np
+from django.http import JsonResponse
+
+net = cv2.dnn.readNet("quiz/templates/quiz/yolov4-tiny.weights", "quiz/templates/quiz/yolov4-tiny.cfg")
+layer_names = net.getLayerNames()
+output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
+classes = []  # Load your class names from the file
+with open("quiz/templates/quiz/coco.names", "r") as f:
+    classes = [line.strip() for line in f.readlines()]
+
+# Your view function to handle POST requests
+from fpdf import FPDF
+import cv2
+import numpy as np
+
+def detect_objects_view(request):
+    if request.method == 'POST':
+        try:
+            # Get image from the request (assuming it's base64 encoded or as a file upload)
+            image = request.FILES['image']  # If the image is uploaded via a form
+            image = cv2.imdecode(np.frombuffer(image.read(), np.uint8), cv2.IMREAD_COLOR)
+            
+            # Perform object detection
+            objects = detect_objects(image, net, output_layers, classes)
+            
+            # Calculate accuracy (just a sample example here)
+            total_objects = len(objects)
+            correct_objects = sum([1 for obj in objects if obj['confidence'] > 70])  # Example condition for correct objects
+            accuracy = (correct_objects / total_objects * 100) if total_objects > 0 else 0
+
+            # Generate the PDF report
+            pdf = FPDF()
+            pdf.add_page()
+
+            # Add the assessment summary
+            pdf.set_font('Arial', 'B', 16)
+            pdf.cell(200, 10, txt="Online MCQ Evaluator Assessment Report", ln=True, align='C')
+
+            pdf.set_font('Arial', '', 12)
+            pdf.cell(200, 10, txt="Username: Supriya123", ln=True)
+            pdf.cell(200, 10, txt="Email ID: supriyavenkata119@gmail.com", ln=True)
+            pdf.cell(200, 10, txt="Total Questions: 30", ln=True)
+            pdf.cell(200, 10, txt="Total Questions Attempted: 0", ln=True)
+            pdf.cell(200, 10, txt="Correct Answers: 0", ln=True)
+            pdf.cell(200, 10, txt="Wrong Answers: 0", ln=True)
+
+            # Add object detection labels and accuracy
+            pdf.cell(200, 10, txt="Object Detection Summary:", ln=True)
+            pdf.set_font('Arial', '', 10)
+            for obj in objects:
+                pdf.cell(200, 10, txt=f"Label: {obj['label']}, Confidence: {obj['confidence']}%", ln=True)
+
+            pdf.cell(200, 10, txt=f"Object Detection Accuracy: {accuracy}%", ln=True)
+
+            # Output PDF to a file or send as response
+            pdf.output("assessment_report.pdf")
+
+            return JsonResponse({'message': 'Report generated successfully.'}, status=200)
+
+        except Exception as e:
+            # Handle any exceptions that may arise
+            return JsonResponse({'error': str(e)}, status=500)

@@ -287,7 +287,7 @@ def generate_pdf(request):
         # Display User Information
         p.setFont("Helvetica", 12)
         p.setFillColor(colors.black)
-        p.drawString(1 * inch, 9.0 * inch, f"Username: {assessment_data['username']}")
+        p.drawString(1 * inch, 9.0 * inch, f"Name of the Candidate: {assessment_data['username']}")
         p.drawString(1 * inch, 8.8 * inch, f"Email ID: {email}")
 
         # Display Assessment Details

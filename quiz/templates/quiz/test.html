@@ -325,7 +325,6 @@
             if (currentQuestionIndex < totalQuestions - 1) {
                 currentQuestionIndex++;
                 renderQuestion();
-                saveAnswer();
             }
         }
     
@@ -487,67 +486,44 @@ document.addEventListener('fullscreenchange', (event) => {
             }
         }
     
-        let escPressCount = 0; // Counter for Esc key presses
-let escTimer = null; // Timer to reset the counter
-
-function submitExam() {
-    const answeredQuestions = userAnswers.filter(answer => answer !== null).length;
-
-    if (answeredQuestions === 0) {
-        const confirmSubmit = confirm("You have not answered any questions. Are you sure you want to submit?");
-        if (!confirmSubmit) {
-            return; // Cancel submission if the user is not sure
+        function submitExam() {
+            const answeredQuestions = userAnswers.filter(answer => answer !== null).length;
+            // const confirmSubmit = confirm("You have not answered any questions. Are you sure you want to submit?");
+            if (answeredQuestions === 0) {
+                const confirmSubmit = confirm("You have not answered any questions. Are you sure you want to submit?");
+                if (!confirmSubmit) {
+                    return; // Cancel submission if the user is not sure
+                }
+            }
+    
+            const examResults = {
+                userAnswers: userAnswers, 
+                correctAnswers: userAnswers.filter((answer, index) => answer === document.getElementById(`question-${index + 1}`).dataset.correctAnswer),
+                wrongAnswers: userAnswers.filter((answer, index) => answer !== document.getElementById(`question-${index + 1}`).dataset.correctAnswer),
+                totalQuestions: totalQuestions,
+                easyQuestions: userAnswers.filter(answer => answer !== null && (document.getElementById(`question-${userAnswers.indexOf(answer)}`).dataset.difficulty === 'easy')).length,
+                mediumQuestions: userAnswers.filter(answer => answer !== null && (document.getElementById(`question-${userAnswers.indexOf(answer)}`).dataset.difficulty === 'medium')).length,
+                hardQuestions: userAnswers.filter(answer => answer !== null && (document.getElementById(`question-${userAnswers.indexOf(answer)}`).dataset.difficulty === 'hard')).length
+            };
+    
+            fetch('/submit_assessment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(examResults)
+            })
+            .then(response => {
+                if (response.ok) {
+                    isExamSubmitted = true;
+                    localStorage.setItem('examSubmitted', 'true'); // Set flag in local storage
+                    window.location.href = '/result/'; // Redirect to the thank you page
+                } else {
+                    alert("There was an error submitting the assessment. Please try again.");
+                }
+            });
         }
-    }
-
-    const examResults = {
-        userAnswers: userAnswers, 
-        correctAnswers: userAnswers.filter((answer, index) => answer === document.getElementById(`question-${index + 1}`).dataset.correctAnswer),
-        wrongAnswers: userAnswers.filter((answer, index) => answer !== document.getElementById(`question-${index + 1}`).dataset.correctAnswer),
-        totalQuestions: totalQuestions,
-        easyQuestions: userAnswers.filter(answer => answer !== null && (document.getElementById(`question-${userAnswers.indexOf(answer)}`).dataset.difficulty === 'easy')).length,
-        mediumQuestions: userAnswers.filter(answer => answer !== null && (document.getElementById(`question-${userAnswers.indexOf(answer)}`).dataset.difficulty === 'medium')).length,
-        hardQuestions: userAnswers.filter(answer => answer !== null && (document.getElementById(`question-${userAnswers.indexOf(answer)}`).dataset.difficulty === 'hard')).length
-    };
-
-    fetch('/submit_assessment/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify(examResults)
-    })
-    .then(response => {
-        if (response.ok) {
-            isExamSubmitted = true;
-            localStorage.setItem('examSubmitted', 'true'); // Set flag in local storage
-            window.location.href = '/result/'; // Redirect to the thank you page
-        } else {
-            alert("There was an error submitting the assessment. Please try again.");
-        }
-    });
-}
-
-document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-        escPressCount++;
-
-        if (escPressCount === 2) {
-            console.log("Double Esc detected! Submitting assessment...");
-            submitExam();
-        }
-
-        // Reset the counter after 2 seconds if no second press occurs
-        if (escTimer) {
-            clearTimeout(escTimer);
-        }
-        escTimer = setTimeout(() => {
-            escPressCount = 0;
-        }, 2000);
-    }
-});
-
     
         window.onload = () => {
             requestFullScreen();
@@ -713,93 +689,7 @@ function requestMicrophoneAndCameraAccess() {
 
 // Example usage
 requestMicrophoneAndCameraAccess();
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        console.log("User switched tabs or minimized the browser.");
 
-        // Automatically submit the assessment
-        submitAssessment(true);
-    }
-});
-
-
-function getCSRFToken() {
-    const name = 'csrftoken';
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith(name + '=')) {
-            return decodeURIComponent(cookie.substring(name.length + 1));
-        }
-    }
-    return null;
-}
-        
-        let malpracticeCount = 0; // Counter for malpractice warnings
-
-        // Function to enter fullscreen mode
-        function enterFullScreen() {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.mozRequestFullScreen) { // Firefox
-                document.documentElement.mozRequestFullScreen();
-            } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
-                document.documentElement.webkitRequestFullscreen();
-            } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
-                document.documentElement.msRequestFullscreen();
-            }
-        }
-
-        // Function to handle malpractice warnings and auto-submit
-        function handleMalpractice() {
-            malpracticeCount++;
-            alert("Stop doing that! This will be recorded as malpractice.");
-            
-            if (malpracticeCount >= 2) {
-                alert("You have been warned multiple times. The assessment will now be submitted.");
-                // Code to submit the assessment
-                console.log("Submitting assessment due to repeated malpractice.");
-            }
-        }
-
-        // Event listener for Escape key press
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") {
-                if (!document.fullscreenElement) {
-                    handleMalpractice();
-                }
-            }
-        });
-
-        // Add event listener to button to start fullscreen
-        document.getElementById("startFullScreen").addEventListener("click", enterFullScreen);
-let escPressCount = 0; // Counter for Esc key presses
-let escTimer = null; // Timer to reset the counter
-
-function handleKeydown(event) {
-    if (event.key === "Escape") {
-        escPressCount++;
-
-        if (escPressCount === 2) {
-            // Submit the assessment on the second Esc press
-            alert("Submitting assessment due to double Esc key press.");
-            submitExam();
-        }
-
-        // Reset the counter after 2 seconds if no second press occurs
-        if (escTimer) {
-            clearTimeout(escTimer);
-        }
-        escTimer = setTimeout(() => {
-            escPressCount = 0;
-        }, 2000); // Adjust time frame as needed
-    } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-        event.preventDefault();
-        alert("You cannot navigate during the exam.");
-    }
-}
-
-document.addEventListener("keydown", handleKeydown);
 
     </script>
     

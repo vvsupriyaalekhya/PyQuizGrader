@@ -164,7 +164,6 @@ logger = logging.getLogger(__name__)
 
 def get_correct_answers():
     return [question.answer for question in Question.objects.all()]
-
 @csrf_exempt
 @login_required
 def submit_assessment(request):
@@ -173,6 +172,7 @@ def submit_assessment(request):
 
         username = request.user.username
         user_answers = data.get('userAnswers')  # List of user's answers
+        forced_submission = data.get('forcedSubmission', False)  # Check if submission was forced
         
         # Set the fixed number of questions
         total_questions = 30
@@ -192,10 +192,6 @@ def submit_assessment(request):
                 else:
                     wrong_count += 1
 
-        easy_questions = sum(1 for i in range(total_questions) if Question.objects.get(id=i+1).level == 'easy')
-        medium_questions = sum(1 for i in range(total_questions) if Question.objects.get(id=i+1).level == 'medium')
-        hard_questions = sum(1 for i in range(total_questions) if Question.objects.get(id=i+1).level == 'hard')
-
         logger.info(f"User: {username} - Correct: {correct_count}, Wrong: {wrong_count}, Total Attempted: {total_attempted}")
 
         # Store results in session
@@ -203,11 +199,9 @@ def submit_assessment(request):
             'username': username,
             'correct_count': correct_count,
             'wrong_count': wrong_count,
-            'total_questions': total_questions,  # Fixed number of questions
+            'total_questions': total_questions,
             'total_attempted': total_attempted,
-            'easy_count': easy_questions,
-            'medium_count': medium_questions,
-            'hard_count': hard_questions,
+            'forced_submission': forced_submission,
         }
 
         # Save results to the database
@@ -216,9 +210,6 @@ def submit_assessment(request):
             correct_answers=correct_count,
             wrong_answers=wrong_count,
             total_questions=total_questions,
-            easy_questions=easy_questions,
-            medium_questions=medium_questions,
-            hard_questions=hard_questions,
         )
 
         return JsonResponse({'status': 'success', 'message': 'Assessment submitted successfully.'})

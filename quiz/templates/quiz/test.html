@@ -780,28 +780,34 @@ function getCSRFToken() {
 
         // Add event listener to button to start fullscreen
         document.getElementById("startFullScreen").addEventListener("click", enterFullScreen);
-let escKeyPressCount = 0;
-let escKeyTimer;
+let escPressCount = 0; // Counter for Esc key presses
+let escTimer = null; // Timer to reset the counter
 
-function handleEscKey(event) {
+function handleKeydown(event) {
     if (event.key === "Escape") {
-        escKeyPressCount++;
-        
-        if (escKeyPressCount === 2) {
-            clearTimeout(escKeyTimer); // Clear the timer if the second press occurs in time
-            submitExam(); // Call the submitExam function to submit the assessment
-        } else {
-            // Start/reset a timer to reset the count after 2 seconds
-            clearTimeout(escKeyTimer);
-            escKeyTimer = setTimeout(() => {
-                escKeyPressCount = 0; // Reset the count
-            }, 2000); // Allow a maximum of 2 seconds between presses
+        escPressCount++;
+
+        if (escPressCount === 2) {
+            // Submit the assessment on the second Esc press
+            alert("Submitting assessment due to double Esc key press.");
+            submitExam();
         }
+
+        // Reset the counter after 2 seconds if no second press occurs
+        if (escTimer) {
+            clearTimeout(escTimer);
+        }
+        escTimer = setTimeout(() => {
+            escPressCount = 0;
+        }, 2000); // Adjust time frame as needed
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        alert("You cannot navigate during the exam.");
     }
 }
 
-// Attach the keydown event listener
-document.addEventListener('keydown', handleEscKey);
+document.addEventListener("keydown", handleKeydown);
+
     </script>
     
 </body>

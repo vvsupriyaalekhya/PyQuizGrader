@@ -655,9 +655,6 @@ document.addEventListener('keydown', function (event) {
         escTimer = setTimeout(() => {
             escPressCount = 0;
         }, 1000);
-        if (escPressCount ===1) {
-            alert("stop entering esc button it will be considered as malpractise,if you repeat this the exam will be submitted automatically");
-        }
         if (escPressCount === 2) {
             // User pressed ESC twice within 1 second
             alert("the exam will be submitted due to malpractise");

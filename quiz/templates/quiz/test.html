@@ -741,6 +741,46 @@ function getCSRFToken() {
     }
     return null;
 }
+        
+        let malpracticeCount = 0; // Counter for malpractice warnings
+
+        // Function to enter fullscreen mode
+        function enterFullScreen() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
+                document.documentElement.webkitRequestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+                document.documentElement.msRequestFullscreen();
+            }
+        }
+
+        // Function to handle malpractice warnings and auto-submit
+        function handleMalpractice() {
+            malpracticeCount++;
+            alert("Stop doing that! This will be recorded as malpractice.");
+            
+            if (malpracticeCount >= 2) {
+                alert("You have been warned multiple times. The assessment will now be submitted.");
+                // Code to submit the assessment
+                console.log("Submitting assessment due to repeated malpractice.");
+            }
+        }
+
+        // Event listener for Escape key press
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                if (!document.fullscreenElement) {
+                    handleMalpractice();
+                }
+            }
+        });
+
+        // Add event listener to button to start fullscreen
+        document.getElementById("startFullScreen").addEventListener("click", enterFullScreen);
+
     </script>
     
 </body>

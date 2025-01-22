@@ -690,8 +690,57 @@ function requestMicrophoneAndCameraAccess() {
 
 // Example usage
 requestMicrophoneAndCameraAccess();
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        console.log("User switched tabs or minimized the browser.");
 
+        // Automatically submit the assessment
+        submitAssessment(true);
+    }
+});
 
+function submitAssessment(forcedSubmission = false) {
+    const userAnswers = getUserAnswers(); // Collect user answers from the form
+    const data = {
+        userAnswers: userAnswers,
+        forcedSubmission: forcedSubmission, // Indicate if submission was forced
+    };
+
+    fetch('/submit_assessment/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(), // Ensure CSRF protection
+        },
+        body: JSON.stringify(data),
+    })
+        .then((response) => response.json())
+        .then((result) => {
+            if (result.status === 'success') {
+                alert('Your test has been submitted.');
+                window.location.href = '/thank_you/'; // Redirect to the thank-you page
+            } else {
+                console.error('Error:', result.message);
+                alert('An error occurred while submitting your test.');
+            }
+        })
+        .catch((error) => {
+            console.error('Submission failed:', error);
+        });
+}
+
+// Utility function to get CSRF token (required for Django)
+function getCSRFToken() {
+    const name = 'csrftoken';
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(name + '=')) {
+            return decodeURIComponent(cookie.substring(name.length + 1));
+        }
+    }
+    return null;
+}
     </script>
     
 </body>

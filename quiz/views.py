@@ -1,152 +1,3 @@
-# from django.contrib.auth import authenticate, login, logout
-# from django.contrib import messages
-# from django.shortcuts import render, redirect
-# from django.contrib.auth.decorators import login_required
-# from django.http import HttpResponse, JsonResponse
-# from .models import Question, Results  # Import Results model
-# import json
-# import logging
-# from django.contrib.auth.models import User
-# from reportlab.lib.pagesizes import letter
-# from reportlab.pdfgen import canvas
-
-# logger = logging.getLogger(__name__)
-
-# def get_correct_answers():
-#     # Get the correct answers from the Question model
-#     return [question.answer for question in Question.objects.all()]
-
-# @login_required
-# def submit_assessment(request):
-#     if request.method == 'POST':
-#         data = json.loads(request.body)
-
-#         # Use the logged-in user instead of extracting from request body
-#         username = request.user.username
-#         correct_answers = data.get('correctAnswers')
-#         wrong_answers = data.get('wrongAnswers')
-#         total_questions = data.get('totalQuestions')
-#         easy_questions = data.get('easyQuestions')
-#         medium_questions = data.get('mediumQuestions')
-#         hard_questions = data.get('hardQuestions')
-
-#         # Log the assessment results for debugging
-#         logger.info(f"User: {username} - Correct: {correct_answers}, Wrong: {wrong_answers}")
-
-#         # Store results in session
-#         request.session['assessment_data'] = {
-#             'username': username,
-#             'correct_count': correct_answers,
-#             'wrong_count': wrong_answers,
-#             'total_questions': total_questions,
-#             'easy_count': easy_questions,
-#             'medium_count': medium_questions,
-#             'hard_count': hard_questions,
-#         }
-
-#         # Save results to the database
-#         Results.objects.create(
-#             user=request.user,
-#             correct_answers=correct_answers,
-#             wrong_answers=wrong_answers,
-#             total_questions=total_questions,
-#             easy_questions=easy_questions,
-#             medium_questions=medium_questions,
-#             hard_questions=hard_questions,
-#         )
-
-#         return JsonResponse({'status': 'success', 'message': 'Assessment submitted successfully.'})
-#     else:
-#         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
-
-# @login_required(login_url='login')
-# def thank_you_view(request):
-#     assessment_data = request.session.get('assessment_data', {})
-#     return render(request, 'quiz/thank_you.html', {'assessment_data': assessment_data})
-
-# @login_required(login_url='login')
-# def generate_pdf(request):
-#     assessment_data = request.session.get('assessment_data')
-#     if not assessment_data:
-#         logger.error("No assessment data found in session.")
-#         return HttpResponse("No assessment data found.", status=400)
-
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="{assessment_data["username"]}_assessment.pdf"'
-#     p = canvas.Canvas(response, pagesize=letter)
-
-#     try:
-#         # PDF Heading
-#         p.setFont("Times-Roman", 20)
-#         p.drawString(100, 750, 'Online Assessment Report')
-
-#         # Adding assessment details
-#         p.setFont("Times-Roman", 12)
-#         p.drawString(100, 720, f'Username: {assessment_data["username"]}')
-#         p.drawString(100, 700, f'Total Questions: {assessment_data["total_questions"]}')
-#         p.drawString(100, 680, f'Correct Answers: {assessment_data["correct_count"]}')
-#         p.drawString(100, 660, f'Wrong Answers: {assessment_data["wrong_count"]}')
-#         p.drawString(100, 640, f'Easy Questions: {assessment_data["easy_count"]}')
-#         p.drawString(100, 620, f'Medium Questions: {assessment_data["medium_count"]}')
-#         p.drawString(100, 600, f'Hard Questions: {assessment_data["hard_count"]}')
-
-#         # Finalize PDF
-#         p.showPage()
-#         p.save()
-#         del request.session['assessment_data']  # Clear session data after PDF generation
-#     except Exception as e:
-#         logger.error("Error generating PDF: %s", e)
-#         return HttpResponse("Error generating PDF.", status=500)
-
-#     return response
-
-# @login_required(login_url='login')
-# def test_view(request):
-#     questions = Question.objects.order_by('?')[:30]
-#     context = {
-#         'questions': questions,
-#         'username': request.user.username  # Ensure correct username is passed
-#     }
-#     return render(request, 'quiz/test.html', context)
-
-# def login_view(request):
-#     if request.method == "POST":
-#         username = request.POST.get('username')
-#         password = request.POST.get('password')
-#         user = authenticate(request, username=username, password=password)
-        
-#         if user:
-#             login(request, user, backend='django.contrib.auth.backends.ModelBackend')  # Login the authenticated user
-#             return redirect('exam')  # Redirect to the exam view
-
-#         else:
-#             # Check if user with username exists but password is incorrect
-#             if User.objects.filter(username=username).exists():
-#                 messages.error(request, "Invalid username or password.")
-#             else:
-#                 try:
-#                     # Create a new user
-#                     user = User.objects.create_user(username=username, password=password)
-#                     # Login with specified backend
-#                     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-#                     messages.success(request, "Registration successful! You are now logged in.")
-#                     return redirect('exam')  # Redirect to the exam view
-#                 except Exception as e:
-#                     messages.error(request, f"Error creating user: {str(e)}")
-    
-#     return render(request, 'quiz/login.html')
-
-# @login_required(login_url='login')
-# def exam_view(request):
-#     print(f"Logged in user: {request.user.username}")  # Debugging output
-#     context = {
-#         'username': request.user.username  # Ensure context has the correct username
-#     }
-#     return render(request, 'quiz/exam.html', context)
-
-# def logout_view(request):
-#     logout(request)  # Log out the user
-#     return redirect('login')  # Redirect to the login page after logout
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import render, redirect
@@ -164,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 def get_correct_answers():
     return [question.answer for question in Question.objects.all()]
+
 @csrf_exempt
 @login_required
 def submit_assessment(request):
@@ -172,7 +24,6 @@ def submit_assessment(request):
 
         username = request.user.username
         user_answers = data.get('userAnswers')  # List of user's answers
-        forced_submission = data.get('forcedSubmission', False)  # Check if submission was forced
         
         # Set the fixed number of questions
         total_questions = 30
@@ -192,6 +43,10 @@ def submit_assessment(request):
                 else:
                     wrong_count += 1
 
+        easy_questions = sum(1 for i in range(total_questions) if Question.objects.get(id=i+1).level == 'easy')
+        medium_questions = sum(1 for i in range(total_questions) if Question.objects.get(id=i+1).level == 'medium')
+        hard_questions = sum(1 for i in range(total_questions) if Question.objects.get(id=i+1).level == 'hard')
+
         logger.info(f"User: {username} - Correct: {correct_count}, Wrong: {wrong_count}, Total Attempted: {total_attempted}")
 
         # Store results in session
@@ -199,9 +54,11 @@ def submit_assessment(request):
             'username': username,
             'correct_count': correct_count,
             'wrong_count': wrong_count,
-            'total_questions': total_questions,
+            'total_questions': total_questions,  # Fixed number of questions
             'total_attempted': total_attempted,
-            'forced_submission': forced_submission,
+            'easy_count': easy_questions,
+            'medium_count': medium_questions,
+            'hard_count': hard_questions,
         }
 
         # Save results to the database
@@ -210,6 +67,9 @@ def submit_assessment(request):
             correct_answers=correct_count,
             wrong_answers=wrong_count,
             total_questions=total_questions,
+            easy_questions=easy_questions,
+            medium_questions=medium_questions,
+            hard_questions=hard_questions,
         )
 
         return JsonResponse({'status': 'success', 'message': 'Assessment submitted successfully.'})
@@ -394,124 +254,3 @@ def logout_view(request):
 def capture_view(request):
     return render(request, 'quiz/capture.html')
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import cv2
-import numpy as np
-from io import BytesIO
-from PIL import Image
-
-net = cv2.dnn.readNet("quiz/templates/quiz/yolov4-tiny.weights", "quiz/templates/quiz/yolov4-tiny.cfg")
-layer_names = net.getLayerNames()
-output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
-
-with open("quiz/templates/quiz/coco.names", "r") as f:
-    classes = [line.strip() for line in f.readlines()]
-
-import cv2
-import numpy as np
-
-def detect_objects(image, net, output_layers, classes):
-    blob = cv2.dnn.blobFromImage(image, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
-    net.setInput(blob)
-    outs = net.forward(output_layers)
-
-    class_ids = []
-    confidences = []
-    boxes = []
-    height, width, _ = image.shape
-
-    for out in outs:
-        for detection in out:
-            scores = detection[5:]
-            class_id = np.argmax(scores)
-            confidence = scores[class_id]
-            if confidence > 0.5:  # Confidence threshold
-                center_x = int(detection[0] * width)
-                center_y = int(detection[1] * height)
-                w = int(detection[2] * width)
-                h = int(detection[3] * height)
-
-                x = int(center_x - w / 2)
-                y = int(center_y - h / 2)
-
-                boxes.append([x, y, w, h])
-                confidences.append(float(confidence))
-                class_ids.append(class_id)
-
-    # Apply NMS
-    indices = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
-
-    detected_objects = []
-    if len(indices) > 0:
-        for i in indices.flatten():
-            x, y, w, h = boxes[i]
-            label = str(classes[class_ids[i]])  # Get the label
-            confidence = round(confidences[i] * 100, 2)
-            detected_objects.append({"label": label, "confidence": confidence, "box": [x, y, w, h]})
-
-    return detected_objects
-
-import cv2
-import numpy as np
-from django.http import JsonResponse
-
-net = cv2.dnn.readNet("quiz/templates/quiz/yolov4-tiny.weights", "quiz/templates/quiz/yolov4-tiny.cfg")
-layer_names = net.getLayerNames()
-output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
-classes = []  # Load your class names from the file
-with open("quiz/templates/quiz/coco.names", "r") as f:
-    classes = [line.strip() for line in f.readlines()]
-
-# Your view function to handle POST requests
-from fpdf import FPDF
-import cv2
-import numpy as np
-
-def detect_objects_view(request):
-    if request.method == 'POST':
-        try:
-            # Get image from the request (assuming it's base64 encoded or as a file upload)
-            image = request.FILES['image']  # If the image is uploaded via a form
-            image = cv2.imdecode(np.frombuffer(image.read(), np.uint8), cv2.IMREAD_COLOR)
-            
-            # Perform object detection
-            objects = detect_objects(image, net, output_layers, classes)
-            
-            # Calculate accuracy (just a sample example here)
-            total_objects = len(objects)
-            correct_objects = sum([1 for obj in objects if obj['confidence'] > 70])  # Example condition for correct objects
-            accuracy = (correct_objects / total_objects * 100) if total_objects > 0 else 0
-
-            # Generate the PDF report
-            pdf = FPDF()
-            pdf.add_page()
-
-            # Add the assessment summary
-            pdf.set_font('Arial', 'B', 16)
-            pdf.cell(200, 10, txt="Online MCQ Evaluator Assessment Report", ln=True, align='C')
-
-            pdf.set_font('Arial', '', 12)
-            pdf.cell(200, 10, txt="Username: Supriya123", ln=True)
-            pdf.cell(200, 10, txt="Email ID: supriyavenkata119@gmail.com", ln=True)
-            pdf.cell(200, 10, txt="Total Questions: 30", ln=True)
-            pdf.cell(200, 10, txt="Total Questions Attempted: 0", ln=True)
-            pdf.cell(200, 10, txt="Correct Answers: 0", ln=True)
-            pdf.cell(200, 10, txt="Wrong Answers: 0", ln=True)
-
-            # Add object detection labels and accuracy
-            pdf.cell(200, 10, txt="Object Detection Summary:", ln=True)
-            pdf.set_font('Arial', '', 10)
-            for obj in objects:
-                pdf.cell(200, 10, txt=f"Label: {obj['label']}, Confidence: {obj['confidence']}%", ln=True)
-
-            pdf.cell(200, 10, txt=f"Object Detection Accuracy: {accuracy}%", ln=True)
-
-            # Output PDF to a file or send as response
-            pdf.output("assessment_report.pdf")
-
-            return JsonResponse({'message': 'Report generated successfully.'}, status=200)
-
-        except Exception as e:
-            # Handle any exceptions that may arise
-            return JsonResponse({'error': str(e)}, status=500)

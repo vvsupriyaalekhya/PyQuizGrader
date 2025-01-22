@@ -199,6 +199,39 @@
             display: none; /* Hidden by default */
             z-index: 1000; /* Above other elements */
         }
+        .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.btn-confirm {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-confirm:hover {
+    background-color: #45a049;
+}
+
     </style>
 </head>
 <body>
@@ -246,7 +279,13 @@
     </div>
     
     <div id="exit-warning"></div>
-
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <p id="modal-message">Are you sure you want to submit?</p>
+            <button id="confirm-submit" class="btn-confirm">Yes, Submit</button>
+        </div>
+    </div>
+    
     <script>
         let currentQuestionIndex = 0;
         const totalQuestions = '{{ questions|length }}';
@@ -296,27 +335,6 @@
             }
         }
     
-//         function saveAnswer() {
-//     const selectedOption = document.querySelector(`input[name="question-${currentQuestionIndex + 1}"]:checked`);
-//     const errorMessageDiv = document.getElementById('error-message'); // Get the error message div
-//     errorMessageDiv.style.display = 'none'; // Hide the error message initially
-
-//     if (selectedOption) {
-//         userAnswers[currentQuestionIndex] = selectedOption.value; 
-//         questionStates[currentQuestionIndex] = 'saved'; // Update question state
-//         updateButtonState(currentQuestionIndex);
-//     } else {
-//         errorMessageDiv.textContent = "Please select an answer before saving."; // Set the error message text
-//         errorMessageDiv.style.display = 'block'; // Show the error message
-//         renderQuestion(); // Keep the current question displayed
-//         return; // Exit the function to avoid changing the question index
-//     }
-
-//     if (currentQuestionIndex < totalQuestions - 1) {
-//         currentQuestionIndex++;
-//         renderQuestion();
-//     }
-// }
 
     
         function markForReview() {
@@ -374,61 +392,6 @@
     }
 }
 
-// function submitExam() {
-//     const answeredQuestions = userAnswers.filter(answer => answer !== null).length;
-
-//     if (answeredQuestions === 0) {
-//         const confirmSubmit = confirm("You have not answered any questions. Are you sure you want to submit?");
-//         if (!confirmSubmit) {
-//             return; // Cancel submission if the user is not sure
-//         }
-//     }
-
-//     const examResults = {
-//         userAnswers: userAnswers, // Send user's answers to the server
-//         correctAnswers: userAnswers.filter((answer, index) => answer === document.getElementById(`question-${index + 1}`).dataset.correctAnswer),
-//         wrongAnswers: userAnswers.filter((answer, index) => answer !== document.getElementById(`question-${index + 1}`).dataset.correctAnswer),
-//         totalQuestions: totalQuestions,
-//         easyQuestions: userAnswers.filter(answer => answer !== null && (document.getElementById(`question-${userAnswers.indexOf(answer)}`).dataset.difficulty === 'easy')).length,
-//         mediumQuestions: userAnswers.filter(answer => answer !== null && (document.getElementById(`question-${userAnswers.indexOf(answer)}`).dataset.difficulty === 'medium')).length,
-//         hardQuestions: userAnswers.filter(answer => answer !== null && (document.getElementById(`question-${userAnswers.indexOf(answer)}`).dataset.difficulty === 'hard')).length
-//     };
-
-//     fetch('/submit_assessment/', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json',
-//             'X-CSRFToken': '{{ csrf_token }}'
-//         },
-//         body: JSON.stringify(examResults)
-//     })
-//     .then(response => {
-//         if (response.ok) {
-//             window.location.href = '/thank_you/'; // Redirect to the thank you page
-//         } else {
-//             alert("There was an error submitting the assessment. Please try again.");
-//         }
-//     });
-// }
-
-    
-        // function toggleFullScreen() {
-        //     if (!document.fullscreenElement) {
-        //         document.documentElement.requestFullscreen().catch(err => {
-        //             alert(`Error attempting to enable full-screen mode: ${err.message}`);
-        //         });
-        //     } else {
-        //         document.exitFullscreen();
-        //     }
-        // }
-//         function handleKeydown(event) {
-//     if (event.key === 'Escape' && document.fullscreenElement) {
-//         event.preventDefault(); // Prevent exiting full-screen mode
-//         alert("You cannot exit full-screen mode during the quiz!"); // Alert the user
-//         // Re-enter full-screen mode immediately if they try to exit
-//         requestFullScreen();
-//     }
-// }
 
 function requestFullScreen() {
     const overlay = document.getElementById('fullscreen-overlay');
@@ -447,19 +410,6 @@ document.addEventListener('fullscreenchange', (event) => {
     }
 });
 
-// window.onload = () => {
-//     requestFullScreen();
-//     setTimeout(() => {
-//         if (!document.fullscreenElement) {
-//             document.getElementById('fullscreen-overlay').style.display = 'flex'; 
-//         }
-//     }, 1000);
-//     startTimer(); // Start the timer when the page loads
-//     renderQuestion(); // Show the first question on load
-
-//     // Add the event listener for keydown
-//     document.addEventListener('keydown', handleKeydown);
-// };
 
     </script>
     <script>
@@ -489,12 +439,12 @@ document.addEventListener('fullscreenchange', (event) => {
         function submitExam() {
             const answeredQuestions = userAnswers.filter(answer => answer !== null).length;
             // const confirmSubmit = confirm("You have not answered any questions. Are you sure you want to submit?");
-            if (answeredQuestions === 0) {
-                const confirmSubmit = confirm("You have not answered any questions. Are you sure you want to submit?");
-                if (!confirmSubmit) {
-                    return; // Cancel submission if the user is not sure
-                }
-            }
+            // if (answeredQuestions === 0) {
+            //     //const confirmSubmit = confirm("You have not answered any questions. Are you sure you want to submit?");
+            //     if (!confirmSubmit) {
+            //         return; // Cancel submission if the user is not sure
+            //     }
+            // }
     
             const examResults = {
                 userAnswers: userAnswers, 
@@ -689,6 +639,41 @@ function requestMicrophoneAndCameraAccess() {
 
 // Example usage
 requestMicrophoneAndCameraAccess();
+let escPressCount = 0;
+let escTimer;
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        escPressCount++;
+
+        // Clear the timer if it's already running
+        if (escTimer) {
+            clearTimeout(escTimer);
+        }
+
+        // Set a timer to reset the count if the user doesn't press 'Escape' again within 1 second
+        escTimer = setTimeout(() => {
+            escPressCount = 0;
+        }, 1000);
+        if (escPressCount ===1) {
+            alert("stop entering esc button it will be considered as malpractise,if you repeat this the exam will be submitted automatically");
+        }
+        if (escPressCount === 2) {
+            // User pressed ESC twice within 1 second
+            alert("the exam will be submitted due to malpractise");
+            submitExam(); // Submit the exam or redirect as needed
+            escPressCount = 0;
+        }
+    }
+});
+
+// Detect when the user tries to switch tabs or minimize the window
+document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') {
+        alert("You switched tabs! The exam will be submitted.");
+        submitExam(); // Submit the exam or redirect as needed
+    }
+});
 
 
     </script>

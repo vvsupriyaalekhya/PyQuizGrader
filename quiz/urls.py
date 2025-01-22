@@ -18,7 +18,7 @@ from .views import (
     generate_pdf,
     logout_view,
     capture_view,
-    detect_objects_view,
+    # detect_objects_view,
 )
 
 urlpatterns = [
@@ -32,6 +32,6 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('generate_pdf/', generate_pdf, name='generate_pdf'),
     path('capture/', capture_view, name='capture'),
-    path('detect_objects/', detect_objects_view, name='detect_objects'),
+    # path('detect_objects/', detect_objects_view, name='detect_objects'),
 ]
 

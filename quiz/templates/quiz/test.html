@@ -780,7 +780,28 @@ function getCSRFToken() {
 
         // Add event listener to button to start fullscreen
         document.getElementById("startFullScreen").addEventListener("click", enterFullScreen);
+let escKeyPressCount = 0;
+let escKeyTimer;
 
+function handleEscKey(event) {
+    if (event.key === "Escape") {
+        escKeyPressCount++;
+        
+        if (escKeyPressCount === 2) {
+            clearTimeout(escKeyTimer); // Clear the timer if the second press occurs in time
+            submitExam(); // Call the submitExam function to submit the assessment
+        } else {
+            // Start/reset a timer to reset the count after 2 seconds
+            clearTimeout(escKeyTimer);
+            escKeyTimer = setTimeout(() => {
+                escKeyPressCount = 0; // Reset the count
+            }, 2000); // Allow a maximum of 2 seconds between presses
+        }
+    }
+}
+
+// Attach the keydown event listener
+document.addEventListener('keydown', handleEscKey);
     </script>
     
 </body>

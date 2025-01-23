@@ -497,16 +497,16 @@ document.addEventListener('fullscreenchange', (event) => {
         };
         // Prevent page refresh or reload
        // Prevent page refresh or reload
-window.addEventListener('beforeunload', function (e) {
-    // Show a confirmation message when trying to refresh
-    const confirmationMessage = "Are you sure you want to refresh the page? Your progress may be lost!";
+// window.addEventListener('beforeunload', function (e) {
+//     // Show a confirmation message when trying to refresh
+//     const confirmationMessage = "Are you sure you want to refresh the page? Your progress may be lost!";
     
-    // For browsers that support it, return the confirmation message
-    e.returnValue = confirmationMessage;
+//     // For browsers that support it, return the confirmation message
+//     e.returnValue = confirmationMessage;
     
-    // For other browsers like Chrome that may ignore custom text
-    return confirmationMessage;
-});
+//     // For other browsers like Chrome that may ignore custom text
+//     return confirmationMessage;
+// });
 
 // Prevent keyboard shortcuts or other refresh methods (F5, Ctrl+R)
 window.addEventListener('keydown', function (e) {

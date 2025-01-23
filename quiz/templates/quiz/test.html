@@ -667,11 +667,14 @@ document.addEventListener('keydown', function (event) {
 // Detect when the user tries to switch tabs or minimize the window
 document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') {
-        //alert("You switched tabs! The exam will be submitted.");
+        // alert("You switched tabs! The exam will be submitted.");
         submitExam(); // Submit the exam or redirect as needed
     }
 });
-
+document.addEventListener('keydown', function (e) {
+    e.preventDefault();  // Disable all keyboard input
+    alert("Keyboard typing is disabled during the exam.");
+});
 
     </script>
     

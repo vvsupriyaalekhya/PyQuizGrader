@@ -217,6 +217,23 @@
 
         // Start the video on page load
         startVideo();
+        function preventBackNavigation() {
+            window.history.replaceState(null, null, window.location.href);
+            window.history.pushState(null, null, window.location.href);
+
+            window.onpopstate = function () {
+                alert("Back navigation is disabled during the assessment.");
+                window.history.pushState(null, null, window.location.href);
+            };
+
+            document.addEventListener('keydown', function(event) {
+                if (event.altKey && event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    alert("Back navigation is disabled during the assessment.");
+                }
+            });
+        }
+        window.addEventListener('load', preventBackNavigation); 
     </script>
 </body>
 </html>

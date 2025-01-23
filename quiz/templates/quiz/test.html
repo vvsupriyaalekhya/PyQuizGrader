@@ -674,6 +674,7 @@ document.addEventListener('visibilitychange', function () {
 document.addEventListener('keydown', function (e) {
     e.preventDefault();  // Disable all keyboard input
     alert("Keyboard typing is disabled during the exam.");
+    submitExam();
 });
 // Prevent right-click context menu
 document.addEventListener('contextmenu', function (event) {

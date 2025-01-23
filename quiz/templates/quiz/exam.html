@@ -11,22 +11,13 @@
             text-align: center;
             padding: 50px;
         }
-        /* .container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-        } */
         .container {
-            background-color: white; /*Light blue color */
+            background-color: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 800px;
-            /* text-align: center; */
             display: inline-block;
-            /* background-color: rgba(175, 238, 238, 0.5); Light blue color */
         }
         h1 {
             color: #333;
@@ -57,7 +48,7 @@
         }
         button {
             padding: 10px 15px;
-            background-color:  #007BFF;
+            background-color: #007BFF;
             color: white;
             border: none;
             border-radius: 5px;
@@ -66,7 +57,7 @@
             font-size: 16px;
         }
         button:hover {
-            background-color:  #0056b3; 
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -93,11 +84,46 @@
     </div>
 
     <script>
+        // Function to start the exam
         function startExam() {
-            if (document.getElementById('instructions-read').checked) {
-                window.location.href = '{% url "test" %}';
+            const checkbox = document.getElementById('instructions-read');
+            if (checkbox.checked) {
+                // Redirect to the exam page
+                window.location.href = '{% url "test" %}'; 
+            } else {
+                alert('Please read and agree to the instructions by selecting the checkbox before starting the assessment.');
             }
         }
+
+        
+// Prevent back navigation with history manipulation
+window.history.replaceState(null, null, window.location.href);
+window.history.pushState(null, null, window.location.href);
+
+window.onpopstate = function () {
+    alert("Back navigation is disabled during the assessment.");
+    // Push the current URL back into the history stack to prevent navigation
+    window.history.pushState(null, null, window.location.href);
+};
+
+// Prevent 'Alt + Left Arrow' (back keyboard shortcut)
+document.addEventListener('keydown', function (event) {
+    if (event.altKey && event.key === 'ArrowLeft') {
+        event.preventDefault();
+        alert("Back navigation is disabled during the assessment.");
+    }
+});
+
+// Prevent right-click context menu
+document.addEventListener('contextmenu', function (event) {
+    event.preventDefault();
+    alert("Right-click is disabled during the assessment.");
+});
+
+// Prevent leaving or refreshing the page
+window.onbeforeunload = function () {
+    return "You are about to leave the exam page. Are you sure you want to navigate away?";
+};
     </script>
 </body>
 </html>

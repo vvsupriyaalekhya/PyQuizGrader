@@ -671,16 +671,87 @@ document.addEventListener('visibilitychange', function () {
         submitExam(); // Submit the exam or redirect as needed
     }
 });
+let alertCount = 0; // Counter for the number of alerts triggered
+//let isExamSubmitted = false; // Flag to track if the exam has been submitted
+
+// Function to handle keydown event
 document.addEventListener('keydown', function (e) {
     e.preventDefault();  // Disable all keyboard input
     alert("Keyboard typing is disabled during the exam.");
-    
+
+    // Increment the alert counter
+    alertCount++;
+
+    // If the alert count is 2 or more, submit the exam
+    if (alertCount >= 2 && !isExamSubmitted) {
+        alert("Multiple attempts detected. The exam will now be submitted.");
+        submitExam();  // Automatically submit the exam
+    }
 });
+
 // Prevent right-click context menu
 document.addEventListener('contextmenu', function (event) {
     event.preventDefault();
     alert("Right-click is disabled during the assessment.");
 });
+// document.addEventListener('keydown', function(event) {
+//     // Check if the key pressed is "Print Screen"
+//     if (event.key === 'PrintScreen') {
+//         event.preventDefault(); // Prevent the default Print Screen behavior
+//         alert("Print Screen is disabled on this page.");
+//     }
+// });
+// Disable PrintScreen key and Windows+PrintScreen
+document.addEventListener('keydown', function(event) {
+            // Check for the Print Screen key
+            if (event.key === 'PrintScreen') {
+                event.preventDefault(); // Block Print Screen key
+                alert("Taking screenshots is prohibited during the assessment.");
+            }
+
+            // Check for Windows + Print Screen
+            if (event.key === 'PrintScreen' && event.metaKey) {
+                event.preventDefault(); // Block Windows + Print Screen
+                alert("Taking screenshots is prohibited during the assessment.");
+            }
+        });
+
+        document.getElementById('refreshButton').addEventListener('click', function(event) {
+    event.preventDefault();  // Prevent the default action (page refresh)
+    submitExam();  // Call the submit exam function to submit the exam
+});
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        alert("You have navigated away from the exam. The assessment will be submitted.");
+        submitExam(); // Call the submitExam function
+    }
+});
+
+window.addEventListener('blur', () => {
+    alert("You switched away from the exam. The assessment will be submitted.");
+    submitExam(); // Call the submitExam function
+});
+
+window.addEventListener('focus', () => {
+    console.log("Page is in focus.");
+});
+
+window.addEventListener('blur', () => {
+    alert("You have navigated away. Please return to the exam.");
+    // Attempt to refocus the page
+    setTimeout(() => {
+        window.focus();
+    }, 100);
+});
+
+// Prevent minimizing the window using the Windows key
+window.addEventListener('keydown', function (e) {
+    if (e.key === 'Meta' || e.key === 'Tab') {
+        e.preventDefault();
+        alert("Minimizing or switching tabs is not allowed.");
+    }
+});
+
     </script>
     
 </body>

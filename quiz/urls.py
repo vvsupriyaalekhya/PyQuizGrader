@@ -19,12 +19,14 @@ from .views import (
     logout_view,
     capture_view,
     # detect_objects_view,
+    home
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('accounts/login/', include('django.contrib.auth.urls')),
-    path('', login_view, name='login'),
+    path('', home, name='home'),
+    path('login/', login_view, name='login'),
     path('test/', test_view, name='test'),
     path('exam/', exam_view, name='exam'),  # Ensure this matches
     path('submit_assessment/', submit_assessment, name='submit_assessment'),
@@ -33,5 +35,6 @@ urlpatterns = [
     path('generate_pdf/', generate_pdf, name='generate_pdf'),
     path('capture/', capture_view, name='capture'),
     # path('detect_objects/', detect_objects_view, name='detect_objects'),
+    
 ]
 

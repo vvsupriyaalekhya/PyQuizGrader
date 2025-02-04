@@ -254,3 +254,6 @@ def logout_view(request):
 def capture_view(request):
     return render(request, 'quiz/capture.html')
 
+def home(request):
+    return render(request, 'quiz/homepage.html')
+
